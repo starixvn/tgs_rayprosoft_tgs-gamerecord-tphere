@@ -21,9 +21,6 @@ public static class ServiceCollectionExtensions
 		.AddOptions<GameRecordInfoOptions>()
 		.Configure(gameRecordInfoOptions)
 		.Services
-		.RegisterAllServiceUtilityTypes(
-			Assembly.GetExecutingAssembly(),
-			ServiceLifetime.Transient)
 		.AddSingleton<RedisConnectionManager>()
 		.AddGameRecordCore(
 			gameCommandClientOptions,

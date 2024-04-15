@@ -11,6 +11,7 @@ using Tgs.GameRecord.TPhere;
 using Tgs.GameRecord.TPhere.Common;
 using Tgs.GameRecord.TPhere.Core;
 using Tgs.GameRecord.TPhere.Messages;
+using Tgs.MessageQueue.Nats.Serializers;
 
 var filterInstrumentations = new[] { "html", "ico", "png", "jpg" };
 
@@ -94,7 +95,8 @@ builder.Services.AddGameRecord(
 builder.Services
 	.AddKeyedSingleton("Nats", (sp, _) => new NatsConnection(NatsOpts.Default with
 	{
-		Url = builder.Configuration.GetConnectionString("Nats")!
+		Url = builder.Configuration.GetConnectionString("Nats")!,
+		SerializerRegistry = TgsNatsSerializerRegistration.Default
 	}))
 	.AddMessageQueue()
 	.AddNatsMessageQueue(config => config
