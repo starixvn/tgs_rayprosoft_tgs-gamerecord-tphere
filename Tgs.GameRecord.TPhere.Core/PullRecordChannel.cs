@@ -9,8 +9,8 @@ namespace Tgs.GameRecord.TPhere.Core;
 
 internal class PullRecordChannel(
 	ILogger<PullRecordChannel> logger,
-	IServiceProvider serviceProvider,
-	string playerCode) : IDisposable, IAsyncDisposable
+	 ICommandService<PullRecordCommand> service,
+	string key) : IDisposable, IAsyncDisposable
 {
 	private static readonly ActivitySource _ActivitySource = new(name: typeof(PullRecordChannel).FullName!);
 
@@ -28,7 +28,7 @@ internal class PullRecordChannel(
 
 	public event EventHandler? Disposed;
 
-	public string PlayerCode { get; } = playerCode;
+	public string Key { get; } = key;
 
 	~PullRecordChannel()
 	{
@@ -119,8 +119,6 @@ internal class PullRecordChannel(
 					parentContext: default);
 				try
 				{
-					using var scope = serviceProvider.CreateScope();
-					var service = scope.ServiceProvider.GetRequiredService<ICommandService<PullRecordCommand>>();
 					await service.ExecuteAsync(
 						command: command,
 						cancellationToken: cancellationToken)
