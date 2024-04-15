@@ -9,9 +9,9 @@ data:
     {
       "Logging": {
         "LogLevel": { 
-          "Default": "Information",
+          "Default": "Warning",
           "Tgs.GameRecord.TPhere.Messages": "Information",
-          "Tgs.GameRecord.TPhere.Core.JobApplicationServices": "Information"
+          "Tgs.GameRecord.TPhere.Core.JobApplicationServices": "Warning"
         }
       },
       "GameRecord": {
