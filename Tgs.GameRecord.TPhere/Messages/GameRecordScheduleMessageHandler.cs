@@ -3,13 +3,14 @@ using System.Text.Json;
 using Tgs.GameRecord.TPhere.Common;
 using Tgs.GameRecord.TPhere.Core;
 using Tgs.GameRecord.TPhere.Core.ApplicationServices;
+using Tgs.ServiceUtility;
 using Valhalla.MessageQueue;
 
 namespace Tgs.GameRecord.TPhere.Messages;
 
 public class GameRecordScheduleMessageHandler(
 	ILogger<GameRecordScheduleMessageHandler> logger,
-	IPullRecordDispatcher dispatcher) : IMessageHandler<ReadOnlyMemory<byte>>
+	ICommandService<PullRecordCommand> service) : IMessageHandler<ReadOnlyMemory<byte>>
 {
 	public ValueTask HandleAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
 	{
@@ -29,7 +30,7 @@ public class GameRecordScheduleMessageHandler(
 			StartTime: message.StartTime,
 			EndTime: message.EndTime);
 
-		return dispatcher.PushCommandAsync(
+		return service.ExecuteAsync(
 			command: command,
 			cancellationToken: cancellationToken);
 	}
