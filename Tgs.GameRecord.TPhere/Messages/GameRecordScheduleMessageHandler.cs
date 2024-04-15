@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Tgs.GameRecord.TPhere.Common;
-using Tgs.GameRecord.TPhere.Core;
 using Tgs.GameRecord.TPhere.Core.ApplicationServices;
 using Tgs.ServiceUtility;
 using Valhalla.MessageQueue;
@@ -14,6 +13,10 @@ public class GameRecordScheduleMessageHandler(
 {
 	public ValueTask HandleAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
 	{
+		logger.LogInformation("LogOn:{logOn} Subject:{subject}",
+			DateTime.Now.ToString("o"),
+			subject);
+
 		var json = Encoding.UTF8.GetString(data.Span);
 		var message = JsonSerializer.Deserialize<TPhereGameRecordMessage>(json)
 			?? throw new NullReferenceException("The request data resolves to a null value");
