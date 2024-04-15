@@ -13,7 +13,7 @@ public class GameRecordScheduleMessageHandler(
 {
 	public ValueTask HandleAsync(string subject, ReadOnlyMemory<byte> data, IEnumerable<MessageHeaderValue>? headerValues, CancellationToken cancellationToken = default)
 	{
-		logger.LogInformation("LogOn:{logOn} Subject:{subject}",
+		logger.LogInformation("LogOn:{logOn} Subject:{subject} Message:This message was received.",
 			DateTime.Now.ToString("o"),
 			subject);
 
