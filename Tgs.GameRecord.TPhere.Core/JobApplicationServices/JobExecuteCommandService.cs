@@ -36,7 +36,7 @@ internal class JobExecuteCommandService(
 			EndTime = endTime
 		};
 
-		logger.LogDebug("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), message);
+		logger.LogInformation("LogOn:{logOn} Parameters:{parameters}", DateTime.Now.ToString("u"), message);
 
 		await messageSender.PublishAsync(
 			subject: TPhereNatsConst.SchedulePublish,
