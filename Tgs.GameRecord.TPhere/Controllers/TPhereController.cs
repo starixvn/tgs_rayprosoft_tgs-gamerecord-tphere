@@ -24,8 +24,8 @@ public class TPhereController : ControllerBase
 	///				"apiUrl": "https://apidemo.tphere.com/",
 	///				"apiKey": "6309572cf90658e17847a7b021723106",
 	///				"apiToken": "29dad28e8ab9c9855e6aa4b9a9e4a869325931d4976dfcf53266ccbe0c5f3387ea48258c002e3543edbb35f63caa5cacc65ac5c664ccfe0619e1d63018a87dbb",
-	///				"startTime": "2024-04-10T15:40:00+08:00",
-	///				"endTime": "2024-04-10T15:45:00+08:00"
+	///				"startTime": "2024-04-10T15:30:00+08:00",
+	///				"endTime": "2024-04-10T16:00:00+08:00"
 	///         }
 	/// </remarks>
 	[HttpPost("manual")]
