@@ -8,7 +8,7 @@ namespace Tgs.GameRecord.TPhere.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class FunkyController : ControllerBase
+public class TPhereController : ControllerBase
 {
 	/// <summary>
 	/// Games the record manual asynchronous.
@@ -21,7 +21,7 @@ public class FunkyController : ControllerBase
 	///
 	///     Post
 	///         {
-	///				"apiUrl": "http://trial-gp-api-report.funkytest.com/",
+	///				"apiUrl": "https://apidemo.tphere.com/",
 	///				"apiKey": "6309572cf90658e17847a7b021723106",
 	///				"apiToken": "29dad28e8ab9c9855e6aa4b9a9e4a869325931d4976dfcf53266ccbe0c5f3387ea48258c002e3543edbb35f63caa5cacc65ac5c664ccfe0619e1d63018a87dbb",
 	///				"StartTime": "2024-03-19T03:00:00+00:00",
@@ -48,7 +48,7 @@ public class FunkyController : ControllerBase
 	///
 	///     Post
 	///         {
-	///				"apiUrl": "http://trial-gp-api-report.funkytest.com/",
+	///				"apiUrl": "https://apidemo.tphere.com/",
 	///				"apiKey": "6309572cf90658e17847a7b021723106",
 	///				"apiToken": "29dad28e8ab9c9855e6aa4b9a9e4a869325931d4976dfcf53266ccbe0c5f3387ea48258c002e3543edbb35f63caa5cacc65ac5c664ccfe0619e1d63018a87dbb",
 	///				"StartTime": "2024-03-19T03:00:00+00:00",
@@ -75,7 +75,7 @@ public class FunkyController : ControllerBase
 	///
 	///     Post
 	///         {
-	///				"apiUrl": "http://trial-gp-api-report.funkytest.com/",
+	///				"apiUrl": "https://apidemo.tphere.com/",
 	///				"apiKey": "6309572cf90658e17847a7b021723106",
 	///				"apiToken": "29dad28e8ab9c9855e6aa4b9a9e4a869325931d4976dfcf53266ccbe0c5f3387ea48258c002e3543edbb35f63caa5cacc65ac5c664ccfe0619e1d63018a87dbb",
 	///				"StartTime": "2024-03-19T03:00:00+00:00",
