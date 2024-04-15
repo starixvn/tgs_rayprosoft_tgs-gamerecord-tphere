@@ -8,9 +8,15 @@ public static class ServiceRegisterExtensions
 	{
 		using (var scope = app.Services.CreateScope())
 		{
-			var sp = scope.ServiceProvider;
-			var hangfireSchedule = scope.ServiceProvider.GetRequiredService<IHangfireUtensil>();
-			await hangfireSchedule.JobInitAsync().ConfigureAwait(false);
+			try
+			{
+				var sp = scope.ServiceProvider;
+				var hangfireSchedule = scope.ServiceProvider.GetRequiredService<IHangfireUtensil>();
+				await hangfireSchedule.JobInitAsync().ConfigureAwait(false);
+			}catch (Exception ex)
+			{
+				throw;
+			}
 		}
 
 		return app;
