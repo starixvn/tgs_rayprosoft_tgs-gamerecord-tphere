@@ -77,9 +77,9 @@ internal class JobInitCommandService(
 				var configurationDataJson = JsonNode.Parse(gameProviderConfig.ConfigurationData)
 					?? throw new Exception($"Game Provider Configuration does not exist.({gameProviderConfig.GameProviderConfigId})");
 
-				var apiUrl = new Uri(configurationDataJson["ApiUrl"]?.ToString()
-					?? settingConfigurationJson["ApiUrl"]?.ToString()
-					?? throw new Exception($"{gameProviderConfig.Name} Required parameters(ApiUrl)"));
+				var apiBetUrl = new Uri(configurationDataJson["ApiBetUrl"]?.ToString()
+					?? settingConfigurationJson["ApiBetUrl"]?.ToString()
+					?? throw new Exception($"{gameProviderConfig.Name} Required parameters(ApiBetUrl)"));
 				var apiKey = configurationDataJson["ApiKey"]?.ToString()
 					?? settingConfigurationJson["ApiKey"]?.ToString()
 					?? throw new Exception($"{gameProviderConfig.Name} Required parameters(ApiKey)");
@@ -93,7 +93,7 @@ internal class JobInitCommandService(
 				}
 
 				var jobExecuteCommand = new JobExecuteCommand(
-					ApiUrl: apiUrl,
+					ApiUrl: apiBetUrl,
 					ApiKey: apiKey,
 					ApiToken: apiToken);
 
