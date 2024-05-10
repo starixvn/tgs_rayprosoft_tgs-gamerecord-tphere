@@ -19,7 +19,6 @@ public static class ServiceCollectionExtensions
 			ServiceLifetime.Transient)
 		.AddGameCommandClient(gameCommandClientOptions)
 		.AddGameInterfaceTPhereClient(gameInterfaceTPhereClientOptions)
-		.AddGameRecordHandleClient()
 		.AddSingleton(TimeProvider.System)
 		.AddSingleton<IPullRecordDispatcher, PullRecordDispatcher>()
 		.AddTransient<IHangfireUtensil, HangfireUtensil>()

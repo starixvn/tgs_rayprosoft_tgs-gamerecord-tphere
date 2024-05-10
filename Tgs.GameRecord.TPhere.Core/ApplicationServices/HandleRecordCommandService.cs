@@ -1,23 +1,25 @@
 ﻿using System.Text.Json.Nodes;
+using Google.Protobuf.WellKnownTypes;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Tgs.GameRecord.Handle.Client;
-using Tgs.GameRecord.Handle.Common.Protos;
 using Tgs.ServiceUtility;
+using Valhalla.MessageQueue;
 
 namespace Tgs.GameRecord.TPhere.Core.ApplicationServices;
 
 internal class HandleRecordCommandService(
+	ILogger<HandleRecordCommandService> logger,
 	IOptions<GameRecordInfoOptions> options,
-	IGameRecordHandleClient client) : ICommandService<HandleRecordCommand>
+	IMessageSender messageSender) : ICommandService<HandleRecordCommand>
 {
 	private readonly GameRecordInfoOptions _gameRecordInfo = options.Value;
 
-	public ValueTask ExecuteAsync(HandleRecordCommand command, CancellationToken cancellationToken = default)
+	public async ValueTask ExecuteAsync(HandleRecordCommand command, CancellationToken cancellationToken = default)
 	{
 		var externalCreatedOn = command.GameWager.ExternalCreatedOn.ToDateTimeOffset();
-		var wagerState = WagerStates.Running;
-		var freeGameState = FreeGameStates.None;
-		var resettleStates = ResettleStates.None;
+		var betState = Handle.Common.Protos.BetState.Running;
+		var freeGameState = Handle.Common.Protos.FreeGameState.None;
+		var resettleStates = Handle.Common.Protos.ResettleState.None;
 		var externalClosedOn = DateTimeOffset.UnixEpoch;
 		var bet = command.GameWager.Bet.ToDecimal().GetValueOrDefault(0);
 		var validBet = 0.0m;
@@ -31,34 +33,58 @@ internal class HandleRecordCommandService(
 			validBet = command.GameWager.ValidBet.ToDecimal().GetValueOrDefault(0);
 			winLoss = command.GameWager.WinLoss.ToDecimal().GetValueOrDefault(0);
 			settle = command.GameWager.Settle.ToDecimal().GetValueOrDefault(0);
-			wagerState = command.GameWager.IsVoid ? WagerStates.Void : (winLoss > 0) ? WagerStates.Win : WagerStates.Lose;
-			freeGameState = command.GameWager.IsFreeGame ? FreeGameStates.FreeGame : FreeGameStates.None;
-			resettleStates = command.GameWager.IsResettle ? ResettleStates.Resettle : ResettleStates.None;
+			betState = command.GameWager.IsVoid ? Handle.Common.Protos.BetState.Void : (winLoss > 0) ? Handle.Common.Protos.BetState.Win : Handle.Common.Protos.BetState.Loss;
+			freeGameState = command.GameWager.IsFreeGame ? Handle.Common.Protos.FreeGameState.FreeGame : Handle.Common.Protos.FreeGameState.None;
+			resettleStates = command.GameWager.IsResettle ? Handle.Common.Protos.ResettleState.Resettle : Handle.Common.Protos.ResettleState.None;
 		}
 
-		return client.MessageAsync(
-			gameProviderCode: _gameRecordInfo.GameProviderCode,
-			playerCode: command.GameWager.PlayerCode,
-			wagerState: wagerState,
-			wagerType: WagerTypes.Normal,
-			freeGameState: freeGameState,
-			gambleState: GambleStates.None,
-			cashoutState: CashoutStates.None,
-			resettleState: resettleStates,
-			externalRoundId: command.GameWager.ExternalWagerId,
-			externalWagerId: command.GameWager.ExternalWagerId,
-			externalGameId: command.GameWager.ExternalGameId,
-			externalCreatedOn: externalCreatedOn,
-			externalClosedOn: externalClosedOn,
-			externalPayoffOn: externalClosedOn,
-			externalResettleOn: DateTimeOffset.UnixEpoch,
-			bet: bet,
-			validBet: validBet,
-			settle: settle,
-			commission: 0.0m,
-			turnover: validBet,
-			winLoss: winLoss,
-			additionalData: JsonNode.Parse(command.GameWager.AdditionalData)!,
-			cancellationToken: cancellationToken);
+		var request = new Handle.Common.Protos.GameRecordHandleRequest
+		{
+			GameProviderCode = _gameRecordInfo.GameProviderCode,
+			PlayerCode = command.GameWager.PlayerCode,
+			ExternalRoundId = command.GameWager.ExternalRoundId,
+			ExternalBetId = command.GameWager.ExternalWagerId,
+			ExternalGameId = command.GameWager.ExternalGameId,
+			ExternalCreatedOn = externalCreatedOn.ToTimestamp(),
+			ExternalClosedOn = externalClosedOn.ToTimestamp(),
+			ExternalPayoffOn = externalClosedOn.ToTimestamp(),
+			ExternalResettleOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
+			BetState = betState,
+			BetType = Handle.Common.Protos.BetType.Normal,
+			FreeGameState = freeGameState,
+			GambleState = Handle.Common.Protos.GambleState.None,
+			CashoutState = Handle.Common.Protos.CashoutState.None,
+			ResettleState = resettleStates,
+			JackpotState = Handle.Common.Protos.JackpotState.None,
+			Bet = bet,
+			ValidBet = validBet,
+			Settle = settle,
+			Commission = 0.0m,
+			Turnover = validBet,
+			WinLoss = winLoss,
+			Jackpot = 0.0M,
+			AdditionalData = command.GameWager.AdditionalData
+		};
+
+		await messageSender.PublishAsync(
+			subject: Handle.Common.GameRecordHandleNatsConst.GameRecordHandleRequest,
+			data: request,
+			cancellationToken: cancellationToken)
+			.ConfigureAwait(false);
+
+		logger.LogInformation("LogOn:{logOn} Subject:{subject} Mesaage:This publication requests information.({request})",
+			DateTime.Now.ToString("o"),
+			Handle.Common.GameRecordHandleNatsConst.GameRecordHandleRequest,
+			new
+			{
+				request.GameProviderCode,
+				request.PlayerCode,
+				request.ExternalRoundId,
+				request.ExternalBetId,
+				request.ExternalGameId,
+				ExternalCreatedOn = request.ExternalCreatedOn.ToDateTimeOffset(),
+				ExternalClosedOn = request.ExternalClosedOn.ToDateTimeOffset(),
+				request.BetState
+			});
 	}
 }

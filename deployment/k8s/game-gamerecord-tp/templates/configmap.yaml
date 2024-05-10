@@ -11,7 +11,8 @@ data:
         "LogLevel": { 
           "Default": "Warning",
           "Tgs.GameRecord.TPhere.Messages": "Information",
-          "Tgs.GameRecord.TPhere.Core.JobApplicationServices": "Warning"
+          "Tgs.GameRecord.TPhere.Core.JobApplicationServices": "Warning",
+          "Tgs.GameRecord.TPhere.Core.ApplicationServices.HandleRecordCommandService": "Warning"
         }
       },
       "GameRecord": {
