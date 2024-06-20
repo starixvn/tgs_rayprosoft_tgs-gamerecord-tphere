@@ -10,9 +10,10 @@ data:
       "Logging": {
         "LogLevel": { 
           "Default": "Warning",
-          "Grpc.Net.Client.Balancer": "Debug",
-          "Tgs.GameRecord.TPhere.Messages.GameRecordManualByBettimeMessageHandler": "Warning",
-          "Tgs.GameRecord.TPhere.Messages.GameRecordManualMessageHandler": "Warning",
+          "Grpc.Net.Client.Balancer": "Warning",
+          "Grpc.Net.Client.Balancer.DnsResolver": "Debug",
+          "Tgs.GameRecord.TPhere.Messages.GameRecordManualByBettimeMessageHandler": "Information",
+          "Tgs.GameRecord.TPhere.Messages.GameRecordManualMessageHandler": "Information",
           "Tgs.GameRecord.TPhere.Messages.GameRecordScheduleMessageHandler": "Warning",
           "Tgs.GameRecord.TPhere.Core.JobApplicationServices": "Warning",
           "Tgs.GameRecord.TPhere.Core.ApplicationServices.HandleRecordCommandService": "Warning"
