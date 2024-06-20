@@ -10,7 +10,10 @@ data:
       "Logging": {
         "LogLevel": { 
           "Default": "Warning",
-          "Tgs.GameRecord.TPhere.Messages": "Information",
+          "Grpc.Net.Client.Balancer": "Debug",
+          "Tgs.GameRecord.TPhere.Messages.GameRecordManualByBettimeMessageHandler": "Warning",
+          "Tgs.GameRecord.TPhere.Messages.GameRecordManualMessageHandler": "Warning",
+          "Tgs.GameRecord.TPhere.Messages.GameRecordScheduleMessageHandler": "Warning",
           "Tgs.GameRecord.TPhere.Core.JobApplicationServices": "Warning",
           "Tgs.GameRecord.TPhere.Core.ApplicationServices.HandleRecordCommandService": "Warning"
         }
