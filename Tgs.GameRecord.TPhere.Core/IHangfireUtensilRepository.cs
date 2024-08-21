@@ -2,7 +2,7 @@
 
 namespace Tgs.GameRecord.TPhere.Core;
 
-public interface IHangfireUtensil
+public interface IHangfireUtensilRepository
 {
 	public Task JobCheckAsync();
 
