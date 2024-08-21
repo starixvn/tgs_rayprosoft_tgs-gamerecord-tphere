@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Text.Json;
 using System.Threading.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Tgs.GameRecord.TPhere.Core.ApplicationServices;
 using Tgs.ServiceUtility;
@@ -8,13 +10,13 @@ namespace Tgs.GameRecord.TPhere.Core;
 
 internal class PullRecordChannel(
 	ILogger<PullRecordChannel> logger,
-	 ICommandService<PullRecordCommand> service,
+	IServiceProvider serviceProvider,
 	string key) : IDisposable, IAsyncDisposable
 {
 	private static readonly ActivitySource _ActivitySource = new(name: typeof(PullRecordChannel).FullName!);
 
 	private readonly Channel<PullRecordCommand> _channel = Channel.CreateUnbounded<PullRecordCommand>(
-		new UnboundedChannelOptions
+		new()
 		{
 			SingleReader = true
 		});
@@ -113,11 +115,28 @@ internal class PullRecordChannel(
 			if (reader.TryRead(out var command))
 			{
 				using var activity = _ActivitySource.StartActivity(
-					"GameWagersEventSourceChannel handle exchange",
+					"PullRecordChannel handle exchange",
 					 ActivityKind.Internal,
 					parentContext: default);
 				try
 				{
+					logger.LogInformation("{logInformation}",
+						JsonSerializer.Serialize(new
+						{
+							LogOn = DateTime.Now.ToString("u"),
+							Key,
+							Data = new
+							{
+								command.ApiUrl,
+								command.ApiKey,
+								command.ApiToken,
+								StartTime = command.StartTime.ToString("u"),
+								EndTime = command.EndTime.ToString("u")
+							},
+							Message = "This processing."
+						}));
+					using var scope = serviceProvider.CreateScope();
+					var service = scope.ServiceProvider.GetRequiredService<ICommandService<PullRecordCommand>>();
 					await service.ExecuteAsync(
 						command: command,
 						cancellationToken: cancellationToken)
@@ -125,7 +144,21 @@ internal class PullRecordChannel(
 				}
 				catch (Exception ex)
 				{
-					logger.LogError(ex, "Process command occur errors.");
+					logger.LogError(ex, "{logError}",
+						JsonSerializer.Serialize(new
+						{
+							LogOn = DateTime.Now.ToString("u"),
+							Key,
+							Data = new
+							{
+								command.ApiUrl,
+								command.ApiKey,
+								command.ApiToken,
+								StartTime = command.StartTime.ToString("u"),
+								EndTime = command.EndTime.ToString("u")
+							},
+							Message = "This exception occurs."
+						}));
 				}
 			}
 		}

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Tgs.GameInterface.TPhere.Protos;
+using Tgs.GameRecord.Handle.Client;
 using Tgs.GameRecord.TPhere.Core.ApplicationServices;
 using Valhalla.MessageQueue;
 
@@ -14,7 +15,7 @@ public class HandleRecordCommandServiceUnitTest
 	public async Task Loss()
 	{
 		var faceLogger = NullLogger<HandleRecordCommandService>.Instance;
-		var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+		var fakeGameRecordInfoOptions = Options.Create(new GameRecordInfoOptions
 		{
 			GameProviderCode = "TP",
 			GameProviderConfiguration = "TPConfiguration",
@@ -24,7 +25,12 @@ public class HandleRecordCommandServiceUnitTest
 			IntervalMinutesMax = 15,
 			IntervalMinutesMinimum = 1
 		});
-		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakePolicySettingsOptions = Options.Create(new PolicySettingsOptions
+		{
+			RetryCount = 1,
+			RetrySeconds = 1,
+		});
+		var fakeGameRecordHandleClient = Substitute.For<IGameRecordHandleClient>();
 
 		var command = new HandleRecordCommand(
 			new GameWagerInfo
@@ -46,28 +52,28 @@ public class HandleRecordCommandServiceUnitTest
 				AdditionalData = "{\"hall\":\"gpk2\",\"round\":\"570321\",\"rowid\":\"663339213a699d70ef2b8dc2\",\"trace\":false,\"gameid\":\"ds_1008\",\"status\":\"1\",\"betinfo\":null,\"bettime\":\"2024-05-02 02:56:33\",\"bettype\":null,\"pca_win\":\"0\",\"revenue\":\"0\",\"betvalid\":\"5\",\"category\":\"fishing\",\"freegame\":null,\"betamount\":\"5\",\"betresult\":\"-5\",\"game_name\":\"Demon Conquered\",\"gameresult\":null,\"reporttime\":\"2024-05-02 03:02:51\",\"payout_time\":\"2024-05-02 02:56:33\",\"casino_account\":\"4ump0o770f9h\",\"pca_contribute\":\"0\"}"
 			});
 
-		var service = new HandleRecordCommandService(
+		var sut = new HandleRecordCommandService(
 			faceLogger,
-			gameRecordInfo,
-			fakeMessageSender);
+			fakeGameRecordInfoOptions,
+			fakePolicySettingsOptions,
+			fakeGameRecordHandleClient);
 
-		await service.ExecuteAsync(command);
+		await sut.ExecuteAsync(command);
 
-		_ = fakeMessageSender
+		_ = fakeGameRecordHandleClient
 			.Received(1)
-			.PublishAsync(
-			subject: Arg.Is(Handle.Common.GameRecordHandleNatsConst.GameRecordHandleRequest),
-			data: Arg.Is(new Handle.Common.Protos.GameRecordHandleRequest
+			.HandleAsync(
+			source: Arg.Is(new Handle.Common.ViewModels.GameRecordHandleViewModel
 			{
-				GameProviderCode = gameRecordInfo.Value.GameProviderCode,
+				GameProviderCode = fakeGameRecordInfoOptions.Value.GameProviderCode,
 				PlayerCode = command.GameWager.PlayerCode,
 				ExternalRoundId = command.GameWager.ExternalRoundId,
 				ExternalBetId = command.GameWager.ExternalWagerId,
 				ExternalGameId = command.GameWager.ExternalGameId,
-				ExternalCreatedOn = command.GameWager.ExternalCreatedOn,
-				ExternalClosedOn = command.GameWager.ExternalClosedOn,
-				ExternalPayoffOn = command.GameWager.ExternalClosedOn,
-				ExternalResettleOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
+				ExternalCreatedOn = command.GameWager.ExternalCreatedOn.ToDateTimeOffset(),
+				ExternalClosedOn = command.GameWager.ExternalClosedOn.ToDateTimeOffset(),
+				ExternalPayoffOn = command.GameWager.ExternalClosedOn.ToDateTimeOffset(),
+				ExternalResettleOn = DateTimeOffset.UnixEpoch,
 				BetState = Handle.Common.Protos.BetState.Loss,
 				BetType = Handle.Common.Protos.BetType.Normal,
 				FreeGameState = Handle.Common.Protos.FreeGameState.None,
@@ -91,7 +97,7 @@ public class HandleRecordCommandServiceUnitTest
 	public async Task Win()
 	{
 		var faceLogger = NullLogger<HandleRecordCommandService>.Instance;
-		var gameRecordInfo = Options.Create(new GameRecordInfoOptions
+		var fakeGameRecordInfoOptions = Options.Create(new GameRecordInfoOptions
 		{
 			GameProviderCode = "TP",
 			GameProviderConfiguration = "TPConfiguration",
@@ -101,7 +107,12 @@ public class HandleRecordCommandServiceUnitTest
 			IntervalMinutesMax = 15,
 			IntervalMinutesMinimum = 1
 		});
-		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakePolicySettingsOptions = Options.Create(new PolicySettingsOptions
+		{
+			RetryCount = 1,
+			RetrySeconds = 1,
+		});
+		var fakeGameRecordHandleClient = Substitute.For<IGameRecordHandleClient>();
 
 		var command = new HandleRecordCommand(
 			new GameWagerInfo
@@ -123,28 +134,28 @@ public class HandleRecordCommandServiceUnitTest
 				AdditionalData = "{\"hall\":\"gpk2\",\"round\":\"570321\",\"rowid\":\"6633393c3a699d70ef2b8dda\",\"trace\":false,\"gameid\":\"ds_1008\",\"status\":\"1\",\"betinfo\":null,\"bettime\":\"2024-05-02 02:57:00\",\"bettype\":null,\"pca_win\":\"0\",\"revenue\":\"0\",\"betvalid\":\"13\",\"category\":\"fishing\",\"freegame\":null,\"betamount\":\"13\",\"betresult\":\"7\",\"game_name\":\"Demon Conquered\",\"gameresult\":null,\"reporttime\":\"2024-05-02 03:02:51\",\"payout_time\":\"2024-05-02 02:57:00\",\"casino_account\":\"4ump0o770f9h\",\"pca_contribute\":\"0\"}"
 			});
 
-		var service = new HandleRecordCommandService(
+		var sut = new HandleRecordCommandService(
 			faceLogger,
-			gameRecordInfo,
-			fakeMessageSender);
+			fakeGameRecordInfoOptions,
+			fakePolicySettingsOptions,
+			fakeGameRecordHandleClient);
 
-		await service.ExecuteAsync(command);
+		await sut.ExecuteAsync(command);
 
-		_ = fakeMessageSender
+		_ = fakeGameRecordHandleClient
 			.Received(1)
-			.PublishAsync(
-			subject: Arg.Is(Handle.Common.GameRecordHandleNatsConst.GameRecordHandleRequest),
-			data: Arg.Is(new Handle.Common.Protos.GameRecordHandleRequest
+			.HandleAsync(
+			source: Arg.Is(new Handle.Common.ViewModels.GameRecordHandleViewModel
 			{
-				GameProviderCode = gameRecordInfo.Value.GameProviderCode,
+				GameProviderCode = fakeGameRecordInfoOptions.Value.GameProviderCode,
 				PlayerCode = command.GameWager.PlayerCode,
 				ExternalRoundId = command.GameWager.ExternalRoundId,
 				ExternalBetId = command.GameWager.ExternalWagerId,
 				ExternalGameId = command.GameWager.ExternalGameId,
-				ExternalCreatedOn = command.GameWager.ExternalCreatedOn,
-				ExternalClosedOn = command.GameWager.ExternalClosedOn,
-				ExternalPayoffOn = command.GameWager.ExternalClosedOn,
-				ExternalResettleOn = DateTimeOffset.UnixEpoch.ToTimestamp(),
+				ExternalCreatedOn = command.GameWager.ExternalCreatedOn.ToDateTimeOffset(),
+				ExternalClosedOn = command.GameWager.ExternalClosedOn.ToDateTimeOffset(),
+				ExternalPayoffOn = command.GameWager.ExternalClosedOn.ToDateTimeOffset(),
+				ExternalResettleOn = DateTimeOffset.UnixEpoch,
 				BetState = Handle.Common.Protos.BetState.Win,
 				BetType = Handle.Common.Protos.BetType.Normal,
 				FreeGameState = Handle.Common.Protos.FreeGameState.None,
