@@ -22,7 +22,7 @@ public class TPhereController : ControllerBase
 		TPhereGameRecordMessage source)
 		=> messageSender.PublishAsync(
 			subject: TPhereNatsConst.ManualPublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(source)),
+			data: JsonSerializer.SerializeToUtf8Bytes(source),
 			cancellationToken: HttpContext.RequestAborted);
 
 	/// <summary>
@@ -37,7 +37,7 @@ public class TPhereController : ControllerBase
 		TPhereGameRecordMessage source)
 		=> messageSender.PublishAsync(
 			subject: TPhereNatsConst.ManualBettimePublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(source)),
+			data: JsonSerializer.SerializeToUtf8Bytes(source),
 			cancellationToken: HttpContext.RequestAborted);
 
 	/// <summary>
@@ -52,6 +52,6 @@ public class TPhereController : ControllerBase
 		TPhereGameRecordMessage source)
 		=> messageSender.PublishAsync(
 			subject: TPhereNatsConst.SchedulePublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(source)),
+			data: JsonSerializer.SerializeToUtf8Bytes(source),
 			cancellationToken: HttpContext.RequestAborted);
 }

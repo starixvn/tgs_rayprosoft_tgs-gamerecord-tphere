@@ -23,7 +23,6 @@ internal class JobExecuteCommandService(
 	public ValueTask ExecuteAsync(JobExecuteCommand command, CancellationToken cancellationToken = default)
 	{
 		var currentTime = timeProvider.GetUtcNow();
-
 		var endTime = new DateTimeOffset(currentTime.Year, currentTime.Month, currentTime.Day, currentTime.Hour, currentTime.Minute, 0, currentTime.Offset);
 		var startTime = endTime.AddMinutes(_intervalMinutes * -1);
 
@@ -36,14 +35,25 @@ internal class JobExecuteCommandService(
 			EndTime = endTime
 		};
 
-		logger.LogInformation("LogOn:{logOn} Subject:{subject} Parameters:{parameters}",
-			DateTime.Now.ToString("u"),
-			TPhereNatsConst.SchedulePublish,
-			message);
+		logger.LogInformation("{logInformation}",
+			JsonSerializer.Serialize(new
+			{
+				LogOn = DateTime.Now.ToString("u"),
+				Subject = TPhereNatsConst.SchedulePublish,
+				Data = new
+				{
+					message.ApiUrl,
+					message.ApiKey,
+					message.ApiToken,
+					StartTime = message.StartTime.ToString("u"),
+					EndTime = message.EndTime.ToString("u")
+				},
+				Message = "This message publishing handler."
+			}));
 
 		return messageSender.PublishAsync(
 			subject: TPhereNatsConst.SchedulePublish,
-			data: Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message)),
+			data: JsonSerializer.SerializeToUtf8Bytes(message),
 			cancellationToken: cancellationToken);
 	}
 }
