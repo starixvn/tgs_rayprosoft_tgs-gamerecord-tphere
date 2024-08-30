@@ -1,6 +1,7 @@
-﻿using Tgs.GameRecord.TPhere.Core.JobApplicationServices;
+﻿using Tgs.GameRecord.TPhere.Core;
+
+using Tgs.GameRecord.TPhere.Core.JobApplicationServices;
 using Tgs.ServiceUtility;
-using Tgs.GameRecord.TPhere.Core;
 
 namespace Tgs.GameRecord.TPhere.Repositories;
 
